@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  <title>Bearcoin</title>
+
+  <link rel="canonical" href="https://bearcoin.io">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+  <!-- <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet"> -->
+  <style type="text/css">
+    /* latin */
+    @font-face {
+      font-family: 'Covered By Your Grace';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/coveredbyyourgrace/v10/QGYwz-AZahWOJJI9kykWW9mD6opopoqXSOSEEQgsiaXVIw.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    /* cyrillic-ext */
+    @font-face {
+      font-family: 'Oswald';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUtiYySUhiCXABTV.woff) format('woff');
+      unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    }
+
+    /* cyrillic */
+    @font-face {
+      font-family: 'Oswald';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUJiYySUhiCXABTV.woff) format('woff');
+      unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+
+    /* vietnamese */
+    @font-face {
+      font-family: 'Oswald';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUliYySUhiCXABTV.woff) format('woff');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+    }
+
+    /* latin-ext */
+    @font-face {
+      font-family: 'Oswald';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUhiYySUhiCXABTV.woff) format('woff');
+      unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+
+    /* latin */
+    @font-face {
+      font-family: 'Oswald';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUZiYySUhiCXAA.woff) format('woff');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    /* cyrillic-ext */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMRrSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+    }
+
+    /* cyrillic */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtM1rSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+    }
+
+    /* greek-ext */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMVrSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+1F00-1FFF;
+    }
+
+    /* greek */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMprSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+0370-03FF;
+    }
+
+    /* vietnamese */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMZrSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+    }
+
+    /* latin-ext */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMdrSlcZZJmOpwVS.woff) format('woff');
+      unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+
+    /* latin */
+    @font-face {
+      font-family: 'Source Code Pro';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://fonts.gstatic.com/s/sourcecodepro/v18/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMlrSlcZZJmOpw.woff) format('woff');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    .title {
+      padding-top: 10pt;
+      color: #424242;
+      font-size: 52pt;
+      padding-bottom: 20px;
+      font-family: "Oswald";
+      line-height: 1.0;
+      orphans: 2;
+      widows: 2;
+    }
+
+    h1 {
+      padding-top: 36pt;
+      color: #424242;
+      font-size: 18pt;
+      padding-bottom: 0pt;
+      font-family: "Oswald";
+      line-height: 1.0;
+      orphans: 2;
+      widows: 2;
+      text-align: left
+    }
+
+    .content p {
+      color: #424242;
+      font-weight: 400;
+      text-decoration: none;
+      vertical-align: baseline;
+      font-size: 11pt;
+      font-family: "Source Code Pro";
+      font-style: normal
+    }
+
+    .body p {
+      padding-top: 10pt;
+      padding-bottom: 0pt;
+      line-height: 1.3;
+      orphans: 2;
+      widows: 2;
+      text-align: left
+    }
+
+    .subheading {
+      padding-top: 0pt;
+      padding-bottom: 0pt;
+      line-height: 1.0;
+      orphans: 2;
+      widows: 2;
+      text-align: center;
+
+      color: #999999;
+      font-weight: 400;
+      text-decoration: none;
+      vertical-align: baseline;
+      font-size: 21pt;
+      font-family: "Oswald";
+      font-style: normal
+    }
+
+    .partners {
+      margin:100px 0;
+    }
+
+    footer {
+      padding: 2.5rem 0;
+      color: #999;
+      text-align: center;
+      background-color: #f9f9f9;
+      border-top: .05rem solid #e5e5e5;
+    }
+    footer p:last-child {
+      margin-bottom: 0;
+    }
+
+    .card {
+      background-color: #eee;
+      padding: 10px 30px;
+      border-radius: 10px;
+      height: 320px;
+    }
+
+    .chunk-row {
+      margin-bottom: 1em;
+    }
+
+    .stat {
+      font-size: 1.5em;
+      color: #aaa;
+    }
+
+    .launching-soon {
+      color: white;
+      background-color: goldenrod;
+      font-size: 1.5em;
+      font-weight: bold;
+      padding: 0.5em;
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="/assets/web3.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <script>
+    (function() {
+      var currentAccount;
+      var contract;
+      var web3;
+
+      const storedTokensKey = 'tokenAddedAccounts';
+
+      async function maybeAddTokenToMetamask() {
+        try {
+          if ( !tokenAdded() ) {
+            addTokenToMetamask();
+          }
+        }
+        catch( error ){
+          console.log(error);
+        }
+      }
+
+      async function addTokenToMetamask() {
+        const tokenAddress = '0xc76920A8e8393afc64D9eb6cBf3a210F64dC68E8';  //TODO: change to production token only (for safety never save the Testnet Address)
+        const tokenSymbol = 'BTCBEAR';
+        const tokenDecimals = 8;
+        const tokenImage = 'http://bearcoin.io.s3-website.us-east-1.amazonaws.com/assets/logo_small.png';
+
+        try {
+          // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+          const wasAdded = await ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: tokenAddress, // The address that the token is at.
+                symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+                decimals: tokenDecimals, // The number of decimals in the token
+                image: tokenImage, // A string url of the token logo
+              },
+            },
+          });
+
+          if (wasAdded) {
+            setTokenAdded( true );
+            console.log("Saved BTCBEAR token to metamask");
+          } else {
+            console.log('Failed to add token... perhaps canceled by user.');
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      function tokenAdded(){
+        try {
+          let stored = localStorage.getItem(storedTokensKey)
+          return stored == "1";
+        }
+        catch( error ){
+          console.log(error);
+        }
+        return [];
+      }
+
+      function setTokenAdded( added ){
+        localStorage.setItem(storedTokensKey, added ? "1" : 0);
+      }
+
+      async function getWeb3(){
+        return new Promise(async (resolve, reject) => {
+          if (window.ethereum) {
+            web3 = new Web3(window.ethereum);
+            try {
+              // ask user permission to access accounts
+              await window.ethereum.request({ method: "eth_requestAccounts" });
+              resolve(web3);
+            } catch (error) {
+              reject(error);
+            }
+          } else {
+            reject("Must install MetaMask");
+          }
+        });
+      };
+
+      async function getContractName() {
+        let chainName = await web3.chainName;
+        if ( chainName == "Polygon Testnet Mumbai" ) {
+          return "./contracts/DevBearcoin.json"
+        }
+        else if ( chainName == "Ganache Testnet" ) {
+          return "./contracts/LocalDevBearcoin.json"
+        }
+        else {
+          return "./contracts/Bearcoin.json"
+        }
+      }
+
+      async function getStatsPath() {
+        let chainName = await web3.chainName;
+        if ( chainName == "Polygon Testnet Mumbai" ) {
+          return "/stats-testnet.json"
+        }
+        else {
+          return "/stats.json"
+        }
+      }
+
+      const getContract = async () => {
+        var contractName = await getContractName(web3);
+
+        var data = await $.getJSON( contractName );
+        var netId = await web3.eth.net.getId();
+        var deployedNetwork = data.networks[netId];
+
+        contract = new web3.eth.Contract(
+          data.abi,
+          deployedNetwork && deployedNetwork.address
+        );
+
+        if ( deployedNetwork ) {
+          contract.address = deployedNetwork.address;
+        }
+      };
+
+      const displayAccountInfo = async () => {
+        let account = currentAccount;
+
+        $("#networkName").text(web3.chainName);
+        $("#networkAddress").text(account);
+        if (web3.isPolygon) {
+          $('#wrongNetworkError').hide();
+        }
+        else {
+          $('#wrongNetworkError').show();
+        }
+
+        if (web3.isTestnet) {
+          $('#testnetWarning').show();
+        }
+        else {
+          $('#testnetWarning').hide();
+        }
+
+        if (web3.isPolygon ) {
+          $('#inflationDeflation').show();
+
+          if( contract.inflationDeflationEnabled ) {
+            $('#inflationDeflationEnabled').show();
+            $('#inflationDeflationDisabled').hide();
+            $('#enableButton').hide();
+          }
+          else {
+            if ( contract.inProgress ) {
+              $('#inflationDeflationEnabled').hide();
+              $('#inflationDeflationDisabled').hide();
+              $('#inflationDeflationPending').text(contract.inProgressStatus);
+              $('#inflationDeflationPending').show();
+              $('#enableButton').hide();
+            }
+            else {
+              $('#inflationDeflationEnabled').hide();
+              $('#inflationDeflationPending').hide();
+              $('#inflationDeflationDisabled').show();
+              $('#enableButton').show();
+            }
+          }
+        }
+        else {
+          $('#inflationDeflation').hide();
+        }
+
+        $('#yourBalance').text( contract.balance );
+      };
+
+      const refreshState = async () => {
+        await refreshWeb3();
+        await refreshContract();
+      }
+
+      const refreshWeb3 = async () => {
+        const chainId = await web3.eth.getChainId();
+
+        var isPolygon;
+        var isTestnet;
+
+        var chainName;
+        switch (chainId) {
+          case 1:
+            chainName = "Etherium Mainnet";
+            isPolygon = false;
+            isTestnet = false;
+            break;
+          case 3:
+            chainName = "Etherium Testnet Ropsten";
+            isPolygon = false;
+            isTestnet = false;
+            break;
+          case 4:
+            chainName = "Etherium Testnet Rinkeby";
+            isPolygon = false;
+            isTestnet = false;
+            break;
+          case 5:
+            chainName = "Etherium Testnet Görli";
+            isPolygon = false;
+            isTestnet = false;
+            break;
+          case 137:
+            chainName = "Polygon Mainnet";
+            isPolygon = true;
+            isTestnet = false;
+            break;
+          case 80001:
+            chainName = "Polygon Testnet Mumbai";
+            isPolygon = true;
+            isTestnet = true;
+            break;
+          case 1337:
+            chainName = "Ganache Testnet";
+            isPolygon = true;
+            isTestnet = true;
+            break;
+          default:
+            isPolygon = false;
+            isTestnet = false;
+            chainName = "Unknown Network";
+        }
+
+        web3.isPolygon = isPolygon;
+        web3.isTestnet = isTestnet;
+        web3.chainName = chainName;
+      }
+
+      const refreshContract = async () => {
+        await getContract(); //have to reload since we may have changed networks
+
+        if ( web3.isPolygon && contract.methods.inflationDeflationEnabled ) {
+          await contract.methods.inflationDeflationEnabled().call({from: currentAccount}, function(error, result){ if(error){ displayAccountInfo(); } }).then(function(result){
+            contract.inflationDeflationEnabled = result;
+          });
+        }
+        else {
+          contract.inflationDeflationEnabled = false;
+        }
+
+        if ( web3.isPolygon && contract.methods.balanceOf ) {
+          await contract.methods.balanceOf(currentAccount).call({from: currentAccount}, function(error, result){ if(error){ contract.balance = '--'; displayAccountInfo(); } }).then(function(result){
+            contract.balance = (result / 100000000).toLocaleString(undefined, {maximumFractionDigits: 4}) + ' BTCBEAR';
+          });
+        }
+        else {
+          contract.balance = '--';
+        }
+      }
+
+      //function that is called on page load if and only if their exists and
+      //item for the user accoun tin local storage
+      async function connectOnLoad() {
+        try {
+          var stored = localStorage.getItem("account")
+          if ( stored ) {
+            currentAccount = stored;
+            launchApp();
+          }
+        } catch (ex) {
+          console.log(ex)
+        }
+      }
+
+      function setCurrentAccount( account ) {
+        currentAccount = account;
+        localStorage.setItem("account", account);
+      }
+
+      function clearCurrentAccount() {
+        try {
+          localStorage.removeItem("account");
+          localStorage.removeItem("tokenAdded");
+        }
+        catch (ex) {
+          console.log(ex)
+        }
+      }
+
+      async function launchApp() {
+        try {
+          $(".appNotLaunched").hide();
+          $(".appLaunched").show();
+
+          await getWeb3();
+
+          const accounts = await web3.eth.getAccounts();
+          await getContract(web3);
+          await refreshState();
+
+          setCurrentAccount(accounts[0]);
+          window.ethereum.on('accountsChanged', async function (accounts) {
+            await refreshState();
+            setCurrentAccount(accounts[0]);
+            displayAccountInfo();
+          });
+
+          window.ethereum.on('chainChanged', async function (networkId) {
+            setCurrentAccount(accounts[0]);
+            await refreshState();
+            await updateStats();
+            displayAccountInfo();
+          });
+
+          $('.appLaunched .loading').hide();
+          $(".noMetamask").hide();
+          $(".hasMetamask").show();
+
+          displayAccountInfo();
+
+          $("#enableForm").on("submit", async (e) => {
+            e.preventDefault();
+            let accountName = currentAccount;
+            let methods = await contract.methods;
+
+            if (confirm("Are you sure you want to enable inflation and deflation on account " + accountName + "?")) {
+              contract.inProgress = true;
+              contract.inProgressStatus = "Pending...";
+              await contract.methods
+                .enableInflationDeflation()
+                .send({ from: currentAccount, gas: 1000000, gasPrice: 2000000000 }
+                ).once('sending', function(payload){ contract.inProgressStatus = "Sending..."; displayAccountInfo(); }
+                ).once('sent', function(payload){ contract.inProgressStatus = "Confirming..."; displayAccountInfo(); }
+                ).on('error', function(error){ contract.inProgress = false; alert("There was an error sending this transaction!"); console.log(error); displayAccountInfo(); }
+                ).then(function(){ window.location.reload() });
+              displayAccountInfo();
+            }
+          });
+
+          await updateStats();
+
+          await maybeAddTokenToMetamask();
+        } catch (e) {
+          throw e;
+
+          $('.appLaunched .loading').hide();
+          $(".hasMetamask").hide();
+          $(".noMetamask").show();
+        }
+      }
+
+      async function updateStats(){
+        var path = await getStatsPath();
+
+        $('#statUpdated').text("loading...");
+        $.getJSON(path, function(data){
+          $('#statRate').text( ( Math.abs(data.inflationCoef / 1000000 - 1) * 100).toFixed(2) );
+          $('#statDirection').text( data.inflationCoef < 1000000 ? "deflation" : "inflation" );
+          $('#statSupply').text( data.totalSupply.toLocaleString() );
+          $('#statDesired').text( data.desiredSupply.toLocaleString() );
+          $('#statUpdated').text( "last updated " + (new Date(data.timestamp * 1000)).toLocaleDateString() + " " + (new Date(data.timestamp * 1000)).toLocaleTimeString() );
+        });
+      }
+
+      $(document).ready(function(){
+        connectOnLoad();
+
+        $('#launchAppButton').click(function () {
+          launchApp();
+        });
+
+        $('#disconnectButton').click(function(){
+          if ( confirm("Are you sure you want to disconnect Metamask?") ) {
+            clearCurrentAccount();
+            window.location.reload();
+          }
+        });
+
+        window.setInterval(updateStats, 30000);
+      });
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="row text-center p-2 launching-soon">
+    Launching February 2022
+  </div>
+  <div class="container">
+    <div class="jumbotron p-3 p-md-5 text-white rounded text-center" style="background-color:white;">
+      <img src="/assets/logo.png" style="width:200px;">
+      <div class="title"><span>BEAR</span><span style="color:red;">COIN</span></div>
+      <div class="subheading">ENGINEERED INFLATION &amp; DEFLATION</div>
+
+      <div class="text-center" style="float: left; width: 100%; padding-top: 25px;">
+        <a href="/instructions.html">QUICKSTART</a>
+      </div>
+    </div>
+
+    <div class="row mb-2">
+      <div class="col-md-6">
+        <div class="card flex-md-row mb-4 box-shadow h-md-250">
+          <div class="card-body d-flex flex-column align-items-start">
+            <h3 class="mb-0">Your Bearcoin</h3>
+
+            <form id="enableForm">
+              <div class="appNotLaunched">
+                <input type="button" id="launchAppButton" value="Connect to Metamask">
+              </div>
+
+              <div class="appLaunched" style="display:none;">
+                <div class="loading">Connecting to Metamask...</div>
+
+                <div class="noMetamask" style="display:none;">Please install Metamask</div>
+
+                <div class="hasMetamask" style="display:none;">
+                  <div class="chunk-row">
+                    <strong>Network:</strong><br>
+                    <span id="networkName">Unknown</span>
+                    <span id="testnetWarning"
+                      style="color:goldenrod; margin-left:5px; display:none;">
+                      TESTNET
+                    </span>
+                  </div>
+
+                  <div class="chunk-row">
+                    <strong>Account:</strong>
+                    <br>
+                    <span id="networkAddress">Unknown</span>
+                    <input type="button" id="disconnectButton" value="Disconnect" />
+                    <div id="wrongNetworkError" style="color:red; display:none; margin-top:10px;">
+                      Please switch Metamask to the Polygon network.
+                    </div>
+                  </div>
+
+                  <div class="chunk-row">
+                    <strong>Balance:</strong>
+                    <br>
+                    <span id="yourBalance">--</span>
+                  </div>
+
+                  <div class="chunk-row" id="inflationDeflation">
+                    <strong>Inflation Mining Enabled:</strong>
+                    <span id="inflationDeflationEnabled" style="display:none; color:green;">
+                      <br>Yes
+                    </span>
+
+                    <span id="inflationDeflationDisabled" style="display:none;">
+                      No
+                    </span>
+
+                    <span id="inflationDeflationPending" style="color:goldenrod; display:none;">
+                      Pending...
+                    </span>
+                    <br>
+
+                    <input type="submit" value="Enable Now" id="enableButton" style="color:white; border-radius:3px; padding: 3px 8px; background-color:green; border:none; display:none;" />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card flex-md-row mb-4 box-shadow h-md-250">
+          <div class="card-body d-flex flex-column align-items-start">
+            <h3 class="mb-0">Statistics</h3>
+            <div class="chunk-row">
+              <strong>Total Supply</strong><br>
+              <span class="stat" id="statSupply">--</span>
+            </div>
+
+            <div class="chunk-row">
+              <strong>Desired Supply</strong><br>
+              <span class="stat" id="statDesired">--</span>
+            </div>
+
+            <div class="chunk-row">
+              <strong>Direction</strong><br>
+              <span class="stat" id="statRate">--</span><span class="stat">%</span> <span class="stat" id="statDirection">inflation</span>
+            </div>
+
+            <div style="position: absolute; bottom: 8px; right: 26px; color: #a3a3a3; font-size: .8em;">
+              <span id="statUpdated"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main role="main" class="container">
+    <div class="row">
+      <div class="col-md-12 content">
+        <h1>MAKING MONEY IN A BEAR MARKET</h1>
+        <p>Bearcoin is the first decentralized financial instrument to allow investors to profit when the
+          price of Bitcoin falls. When Bitcoin falls, Bearcoin is designed to rise proportionally in
+          value.</p>
+
+        <h1>PROBLEMS WITH SHORT SELLING</h1>
+        <p>For a long time wealthy and experienced investors have used short selling to turn a
+          profit during a market downturn. In a short sale, investors sell borrowed assets that they hope to purchase
+          later
+          at a lower price in order to repay the lender. </p>
+        <p>This is an incredibly risky proposition since your losses are theoretically unlimited
+          if the price of the asset moves up instead of down. Even in traditional markets, short selling is considered
+          too
+          risky for most investors. The high volatility of crypto markets makes short selling all the more
+          lethal.
+        </p>
+        <p>Additionally, short selling is not decentralized or trustless. Investors must trust the
+          exchange - a centralized entity - to perform its duties without error, fraud, or service outage. </p>
+
+        <h1>PROBLEMS WITH OTHER TOKENS</h1>
+        <p>Negatively correlated tokens already exist. However, there is a cost. Ultimately these tokens are
+            still linked to traditional financial instruments (such as short selling) on exchanges, which means they are
+            not
+            decentralized and they can be expensive. Traditional financial instruments use &ldquo;margin&rdquo;, which
+            is
+            borrowed money that must be repaid with interest. This puts a slow drain on the overall value of the token.
+            Additionally, these tokens may charge high management fees - as much as 0.03% per day.</p>
+
+        <h1>ENGINEERED INFLATION AND DEFLATION</h1>
+        <p>Bearcoin is an immutable smart contract existing on the Polygon blockchain (which is an Ethereum-compatible blockchain but with MUCH lower transaction fees than Ethereum). The Bearcoin contract uses Chainlink&rsquo;s BTC/USD price feed as a decentralized price oracle to determine the price movement of Bitcoin.</p>
+        <p>Using this real-time information about price fluctuations in Bitcoin, Bearcoin decides whether to inflate or deflate itself each time Bearcoin tokens change hands. This inflation or deflation is capped at a max of 5% of the transaction&rsquo;s value.</p>
+        <p>If Bitcoin is rising in value, Bearcoin inflates itself by up to 5% per transaction, and these newly minted Bearcoins are paid out to a randomly selected address in the Inflation Pool (more on that later).</p>
+        <p>Conversely, when the price of Bitcoin falls, a transaction fee is burned on each transfer, deflating the currency.</p>
+        <p>Since the maximum rate of engineered inflation/deflation depends on Bearcoin volume, there may be a lag behind the movement of Bitcoin until enough BTCBEAR changes hands to allow the inflation/deflation to catch up to the correct level.</p>
+        <p>For example, if Bitcoin drops 20% in a day and then stays level, Bearcoin will use whatever trading volume is available to eventually deflate the currency by 20%, theoretically driving up the value of each Bearcoin by 20%.</p>
+        <p>The fact that Bearcoin uses engineered inflation and deflation rather than a &ldquo;fiat&rdquo; mechanism like rebasing is what leads to its interesting tokenomics - inflation mining, exchange-friendly swaps, etc.</p>
+
+        <h1>A NOVEL INFLATION MECHANISM: INFLATION MINING</h1>
+        <p>Bearcoin rewards buyers during inflationary periods by distributing the inflation generated during each transaction to a randomly selected address in the Inflation Pool. Any user who holds Bearcoin can visit the bearcoin.io dApp, connect to Metamask, and enable inflation mining on their account.</p>
+        <p>After inflation mining is enabled, as long as that account maintains a balance of at least 100 BTCBEAR, it has a chance of receiving the inflation generated from every transaction. Inflation is distributed by drawing 10 random accounts from the inflation pool, and awarding inflation to the one with the highest balance. </p>
+        <p>In this way, Bearcoin allows anyone to &ldquo;mine inflation&rdquo; by simply enabling inflation mining and then holding at least 100 BTCBEAR in their account (and the higher a balance they maintain, the better odds they have of receiving inflation).</p>
+        <p>For example, if a whale happens to buy $100K of Bearcoin during an inflationary period at the maximum inflation rate of 5%, the inflation generated ($5K of Bearcoin) could be minted to an inflation miner who had a balance of only 110 BTCBEAR. This is possible (though unlikely) because it’s possible the other 9 randomly selected accounts had balances of 100-109 BTCBEAR.</p>
+        <p>One tenth of one percent (0.01%) of inflation goes toward hosting fees for Bearcoin.io, updating the Chainlink price feed, etc. In addition to allowing users to enable inflation mining, Bearcoin.io provides basic information and useful trading statistics: current total supply, current rate of inflation/deflation, etc.</p>
+
+
+        <h1>A NOVEL DEFLATION MECHANISM: DEX-FRIENDLY DEFLATION</h1>
+        <p>Deflationary tokens do not normally play well with decentralized exchanges like Uniswap (they have a bad habit of breaking Liquidity Pool contracts, allowing attackers to steal millions of dollars, etc). So Bearcoin uses a two-pronged approach to deflation: first, during a deflationary cycle (when Bitcoin is going down), Bearcoin marks up to 5% of each transaction as deflation, but initially records the full transaction amount. This makes exchanges happy, since the full value was received, and the swap succeeds. </p>
+        <p>The deflation address and amount are recorded in the contract, and the very next transaction (most likely involving a completely different user) will complete the deflation. So the user would see two transactions probably very close together - the initial transfer of the full amount, and then a second transaction burning the deflation portion. A clever user might try to quickly withdraw the portion marked for deflation before it was burned, but this is prevented by the smart contract.</p>
+        <p>The second mechanism Bearcoin uses to be DEX-friendly is to only deflate accounts that have opted into inflation mining: any account that gets the benefit of inflation mining is also subject to deflation. Since the smart contracts that make up exchanges like Uniswap will never opt into inflation mining, exchange accounts will also never be subject to deflation, and so will have predictable balances and can treat BTCBEAR just like any other ERC20 token.</p>
+
+        <h1>RISKS AND CHALLENGES</h1>
+        <p>Let us be clear: Bearcoin is highly experimental. Despite its numerous advantages over
+          traditional financial instruments, we cannot definitively predict the price action of Bearcoin in relation to
+          Bitcoin. Inflation and deflation will exert predictable economic pressures upon the price of Bearcoin, but
+          ultimately the price will be determined by a combination of factors, including overall market demand for the
+          token
+          itself. </p>
+        <p>Additionally, we do not know what the initial price of Bearcoin should be. Since we
+          cannot possibly predict this, our objective is to launch Bearcoin in an equitable manner and trust that it
+          will
+          find its correct price over time. </p>
+
+        <h1>INITIAL TOKEN DISTRIBUTION</h1>
+        <p>To achieve an equitable distribution with an unknown market cap, the initial token
+          distribution will heavily prioritize free airdrops (28%), and the initial token sale will be conservatively
+          priced
+          (0.10 USDC = 1 BTCBEAR) and go entirely toward funding the liquidity pool (25% sold for USDC, combined with
+          25% of
+          the Bearcoin supply = 50% to the liquidity pool).  The resulting Liquidity Pool tokens will be locked for 5 years in order to guarantee the pool remains stable (after 5 years, max withdrawal of 5% per year).        </p>
+        <p><img alt="" src="/assets/chart.png" style="width: 624.00px;" title="Points scored"></p>
+
+        <h1>ONLY THE BEGINNING</h1>
+        <p>Bearcoin (BTCBEAR) is linked to the fate of Bitcoin, but in future it would be trivial to tweak
+            and redeploy the contract, thus launching related tokens which target other markets - perhaps targeting
+            downtrends
+            in ETH or BNB.</p>
+
+        <h1>NOT A SECURITY</h1>
+        <p>Because Bearcoin is a purely algorithmic system without direct human involvement or control, and
+            moves in relation to Bitcoin (which according to SEC Chair Jay Clayton is not a security), our belief is
+            that
+            Bearcoin is not a security. At the very least, we believe Bearcoin definitely does NOT meet part 4 of the
+            Howey
+            Test and so it should not be classified as a security. Therefore, it should be tradable on US-based
+            exchanges.</p>
+
+
+        <h1>SOME MATHS</h1>
+        <p>For the geeks out there, Bearcoin records a constant &ldquo;Genesis Bitcoin
+          Price&rdquo; and &ldquo;Genesis Bearcoin Supply&rdquo;. As a shout-out to Bitcoin, the latter will be set to
+          21,000,000, and the former will be whatever the price of bitcoin is when the contract is deployed to the
+          mainnet.</p>
+        <p>At any given point in time:</p>
+        <p><img
+              alt="" src="/assets/math.png"
+              style="width: 485.00px;"
+              title=""></p>
+        <p>Once desired_bearcoin_supply is calculated, that value is compared to the
+          current_bearcoin_supply and the calculation is made for how aggressively to inflate/deflate to bring
+          current_bearcoin_supply towards desired_bearcoin_supply (up to the 5% maximum rate).</p>
+        <p>A publicly callable function to update current_bitcoin_price from the Chainlink data feed is
+            available - this will be called automatically at frequent intervals by infrastructure deployed by the
+            Bearcoin
+            team, but anyone else can request an update, as well (subject to a reasonable rate limit).</p>
+
+        <h1>CONCLUSION</h1>
+        <p>Bearcoin provides a novel contrarian investment vehicle targeted initially at Bitcoin,
+          but with massive potential to expand and launch other contrarian tokens on the same infrastructure.</p>
+        <p>It provides theoretical risk levels similar to long investments, coupled to the power
+          and utility of short investments, with a novel &ldquo;inflation mining&rdquo; mechanism to support trading
+          volume
+          and a novel &ldquo;DEX-friendly deflation&rdquo; mechanism to allow easy trading.</p>
+
+
+        <div class="partners" style="position:relative; width:100%; height:250px;">
+          <img alt="Polygon Logo" src="/assets/polygon.png" style="width:250px; position:absolute; top:0; left:0;">
+          <img alt="Chainlink Logo" src="/assets/chainlink.png" style="width:200px; position:absolute; top:0; right:0;">
+          <img alt="VLaunch Logo" src="/assets/alchemy.png" style="width:175px; position:absolute; bottom:50px; left:45%;">
+          <img alt="Uniswap Logo" src="/assets/uniswap.png" style="width:250px; position:absolute; bottom:0; left:0;">
+        </div>
+      </div><!-- /.blog-main -->
+    </div><!-- /.row -->
+
+  </main><!-- /.container -->
+
+  <footer>
+    <p>Copyright Bearcoin.io</p>
+    <p>
+      <a href="#">Back to top</a>
+    </p>
+  </footer>
+</body>
+
+</html>

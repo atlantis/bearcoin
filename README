@@ -1,0 +1,8 @@
+CODE AUDIT
+
+The two contracts that need to be audited are:
+
+BearcoinBase
+Bearcoin
+
+The other two contracts are just for testing.

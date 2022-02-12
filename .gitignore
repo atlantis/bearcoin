@@ -1,0 +1,9 @@
+/build/*
+.DS_Store
+/node_modules/*
+.secret
+.env
+/client/node_modules/*
+/statsbot/node_modules/*
+/statsbot/*.zip
+*.code-workspace
