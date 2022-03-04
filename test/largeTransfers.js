@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -50,7 +50,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -91,7 +91,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -141,7 +141,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -184,7 +184,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;

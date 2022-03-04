@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.10;
 
 import "./BearcoinBase.sol";
@@ -21,6 +22,10 @@ contract DevBearcoin is BearcoinBase {
     _rateLimitUpdateInflationRate = false;
 
     onDeploy();
+  }
+
+  function devSetGenesisTimestamp( uint256 timestamp ) public onlyOwner {
+    _genesisTimestamp = timestamp;
   }
 
   function devSetGenesisBitcoinPrice( uint256 price ) public onlyOwner {
@@ -47,11 +52,15 @@ contract DevBearcoin is BearcoinBase {
     return _randomSeed;
   }
 
-  function devPerformUpkeepUpdateRate(bytes calldata /* performData */) external {
+  function devSetLastUpkeepAt( uint256 timestamp ) public onlyOwner {
+    _lastUpkeepAt = timestamp;
+  }
+
+  function devPerformUpkeepUpdateRate( bytes calldata /* performData */ ) external onlyOwner {
     updateInflationDeflationRate();
   }
 
-  function devPerformUpkeepCheckLink(bytes calldata /* performData */) external {
+  function devPerformUpkeepCheckLink( bytes calldata /* performData */ ) external onlyOwner {
     if ( LINK.balanceOf(address(this)) >= s_fee ) {
       emit DebugBool(true);
     }
@@ -60,7 +69,20 @@ contract DevBearcoin is BearcoinBase {
     }
   }
 
-  function devPerformUpkeepRequestRandomness(bytes calldata /* performData */) external {
+  function devPerformUpkeepRequestRandomness( bytes calldata /* performData */ ) external onlyOwner {
     requestRandomness(s_keyHash, s_fee);
+  }
+
+  function devSetAirdropStartAt( uint256 timestamp ) public onlyOwner {
+    _airdropStartAt = timestamp;
+    emit DebugUint256(_airdropStartAt);
+  }
+
+  function devAirdrop() external onlyOwner {
+    airdrop();
+  }
+
+  function devSetLastAirdropAt( uint256 timestamp ) public onlyOwner {
+    _lastAirdropAt = timestamp;
   }
 }

@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -10,7 +10,6 @@ contract("TestBearcoin", accounts => {
     genesisPrice = await bearcoin.genesisBitcoinPrice();
 
     //Make sure some folks are in the inflation pool
-
     var isEnabled = await bearcoin.inflationDeflationEnabled.call({from: accounts[7]});
 
     if ( !isEnabled.valueOf() ) {
@@ -103,7 +102,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -156,7 +155,7 @@ contract("TestBearcoin", accounts => {
 });
 
 //Have to reset the total supply for this to work due to rounding
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -212,7 +211,7 @@ contract("TestBearcoin", accounts => {
 
 
 //Have to reset the total supply for this to work due to rounding
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -266,7 +265,7 @@ contract("TestBearcoin", accounts => {
   });
 });
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;

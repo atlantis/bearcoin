@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("TestBearcoin", accounts => {
+contract("Bearcoin", accounts => {
   let bearcoin;
   beforeEach('should setup the contract instance', async () => {
     bearcoin = await Bearcoin.deployed();
