@@ -6,22 +6,6 @@ contract("TestBearcoin", accounts => {
     bearcoin = await Bearcoin.deployed();
   });
 
-  it("should start out paused", async () => {
-    var paused = await bearcoin.inflationDeflationPaused.call();
-    assert.equal(
-      paused,
-      true,
-      "inflation rate did not start paused"
-    );
-  });
-});
-
-contract("TestBearcoin", accounts => {
-  let bearcoin;
-  beforeEach('should setup the contract instance', async () => {
-    bearcoin = await Bearcoin.deployed();
-  });
-
   it("should pause price updates if zero value is encountered", async () => {
     let genesisPrice = await bearcoin.genesisBitcoinPrice();
     await bearcoin.testSetBitcoinPrice(genesisPrice.toNumber() + 1000);

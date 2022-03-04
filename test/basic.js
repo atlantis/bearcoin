@@ -12,14 +12,22 @@ contract("TestBearcoin", accounts => {
 
   it("should send genesis Bearcoin supply to the owner account", async () => {
     let genesisSupply = await bearcoin.genesisBearcoinSupply();
+    let airdropSupply = await bearcoin.airdropSupply();
+    let contractBalance = await bearcoin.balanceOf(bearcoin.address);
 
     let owner = await bearcoin.owner();
     var balance = await bearcoin.balanceOf(owner);
 
     assert.equal(
       balance.toString(),
-      genesisSupply.toString(),
+      (genesisSupply.toNumber() - airdropSupply.toNumber()).toString(),
       "initial owner supply is incorrect"
+    );
+
+    assert.equal(
+      contractBalance.toString(),
+      airdropSupply.toNumber().toString(),
+      "contract balance (airdrop supply) is incorrect"
     );
   });
 

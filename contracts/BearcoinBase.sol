@@ -17,14 +17,21 @@ struct Deflation {
 abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase {
   bool internal _inflationDeflationPaused = false;  //Used temporarily in case of price data failure...
   bool internal _rateLimitUpdateInflationRate = true;
-
   uint32 internal _inflationCoef = 1000000;  //1000000 = 1 = no change; valid range 950000 - 1050000 (since max 5% swing)
+  uint256 internal constant _oneToken = 100000000;
 
+  uint256 internal _genesisTimestamp = 0;
   uint256 internal _genesisBitcoinPrice = 3630970000000;  //Only reason it's not a constant is so we can mess with it in dev mode
-  uint256 constant _genesisBearcoinSupply = 21000000 * 100000000;
+  uint256 constant _genesisBearcoinSupply = 21000000 * _oneToken;
 
-  uint8 constant maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate s
-  Deflation[] internal _pendingDeflation; //Tracks deflation for the current transaction and the previous ones
+  uint256 internal _airdropStartAt = 0;
+  uint256 constant _airdropSupply = _genesisBearcoinSupply * 38 / 100;
+  uint256 internal _lastAirdropAt = 0;
+  uint256 internal _airdropsPerUpkeep = 50;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
+  uint8 internal _forceStartAirdropDays = 60; //If the owner hasn't started the airdrop after this many days, force it to start
+
+  uint8 constant _maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate
+  Deflation[_maxPendingDeflationCount] internal _pendingDeflation; //Tracks deflation for the current transaction and the previous ones
 
   AggregatorV3Interface internal _priceFeed;
 
@@ -34,6 +41,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint256 internal _lastUpkeepAt = 0;
   uint256 internal _lastRateUpdateAt = 0;
   uint256 internal _lastRandomSeedUpdateAt = 0;
+  bool internal _bypassUpkeepRandomness = false;  //Used for testing
 
   //Every address which has enabled inflation/deflation
   address[] private _inflatees_deflatees;
@@ -47,7 +55,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint256 internal _randomSeed = 1111111; //Will be updated periodically with truly random data
 
   //How often will the upkeep function run
-  uint32 constant upkeepSeconds = 600;
+  uint32 constant upkeepSeconds = 200;
 
   //Don't let the bitcoin price be updated more than every few seconds
   uint32 constant bitcoinPriceUpdateRateLimitSeconds = 10;
@@ -119,7 +127,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     }
   }
 
-  //Make an effort to avoid increasing the pendingDeflation array
+  //Record pending deflation so it can be burned by the next transaction
   function _pushPendingDeflation(address account, uint256 amount) private {
     bool added = false;
 
@@ -134,10 +142,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
       }
     }
 
-    if ( !added ) {
-      _pendingDeflation.push( Deflation(block.number, account, amount) );
-      require(_pendingDeflation.length <= maxPendingDeflationCount, "too much deflation in one transaction");
-    }
+    require(added, "too much deflation in one transaction");
   }
 
   //Returns whether a particular account is subject to inflation/deflation
@@ -320,6 +325,8 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     int256 rawBitcoinPrice = _fetchBitcoinPrice();
 
     uint256 latestBitcoinPrice = 0;
+
+    //Never, ever allow a bitcoin price of zero or negative
     if ( rawBitcoinPrice > 0 ) {
       latestBitcoinPrice = uint256(rawBitcoinPrice);
     }
@@ -458,6 +465,11 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     return _bitcoinPrice;
   }
 
+  //Returns the airdrop supply
+  function airdropSupply() public pure returns (uint256) {
+    return _airdropSupply;
+  }
+
   //Returns the genesis bearcoin supply
   function genesisBearcoinSupply() public pure returns (uint256) {
     return _genesisBearcoinSupply;
@@ -483,26 +495,101 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     upkeepNeeded = block.timestamp > _lastUpkeepAt + upkeepSeconds;
   }
 
-  //Get the latest bitcoin price and request randomness
+  //Get the latest bitcoin price, request randomness, and airdrop
+  //Each of these actions is only called 1/3 of the time, so even if problems with one action
+  //cause a revert, the others will continue to function (though less frequently)
   function performUpkeep(bytes calldata /* performData */) external override {
     _lastUpkeepAt = block.timestamp;
 
-    //Don't even try if we'd fail
-    if ( block.timestamp >= _lastRateUpdateAt + bitcoinPriceUpdateRateLimitSeconds ) {
-      updateInflationDeflationRate();
+    if ( _bypassUpkeepRandomness || random(1) % 3 == 1 ) {
+      //Don't even try if we'd fail
+      if ( block.timestamp >= _lastRateUpdateAt + bitcoinPriceUpdateRateLimitSeconds ) {
+        updateInflationDeflationRate();
+      }
     }
 
-    //Rate limit to protect from draining LINK from the contract...
-    //also, in case something goes wrong, this means we won't revert most of the time
-    //(so updateInflationDeflationRate still works)
-    if ( block.timestamp >= _lastRandomSeedUpdateAt + randomSeedUpdateSeconds ) {
-      //Be careful not to attempt this unless we have enough LINK
-      if ( LINK.balanceOf(address(this)) >= s_fee ) {
-        requestRandomness(s_keyHash, s_fee);
+    if ( _bypassUpkeepRandomness || random(2) % 3 == 1 ) {
+      //Rate limit to protect from draining LINK from the contract...
+      if ( block.timestamp >= _lastRandomSeedUpdateAt + randomSeedUpdateSeconds ) {
+        //Be careful not to attempt this unless we have enough LINK
+        if ( LINK.balanceOf(address(this)) >= s_fee ) {
+          requestRandomness(s_keyHash, s_fee);
+        }
+        else {
+          emit InsufficientLINK();
+        }
       }
-      else {
-        emit InsufficientLINK();
+    }
+
+    if ( _bypassUpkeepRandomness || random(3) % 3 == 1 ) {
+      if ( _airdropStartAt > 0 && _lastAirdropAt < block.timestamp - 86400 && balanceOf(address(this)) > 0 ) {
+        //This may be called multiple times until the airdrop is complete for the current day
+        airdrop();
       }
+      else if ( _airdropStartAt == 0 && block.timestamp > _genesisTimestamp + (86400 * _forceStartAirdropDays) ) {
+        //Force the airdrop to start if it hasn't already after too long
+        _startAirdrop();
+      }
+    }
+  }
+
+  //Starts the airdrop (if this isn't called after _forceStartAirdropDays, the airdrop will be started anyway)
+  function startAirdrop() public onlyOwner {
+    _startAirdrop();
+  }
+
+  //Internal function to actually start the airdrop
+  function _startAirdrop() internal {
+    if ( _airdropStartAt == 0 ) {
+      _airdropStartAt = block.timestamp;
+    }
+  }
+
+  //Called by upkeep to distribute airdrops every day
+  function airdrop() internal {
+    //How much was actually distributed by now?
+    uint256 distributed = _airdropSupply - balanceOf(address(this));
+
+    //How much should have been distributed by now?
+    uint256 shouldHaveBeenDistributed = (_airdropSupply / 365) * ((block.timestamp - _airdropStartAt) / 86400);
+
+    if ( distributed < shouldHaveBeenDistributed ) {
+      //Distribute the difference
+      uint256 toBeDistributed = shouldHaveBeenDistributed - distributed;
+      uint256 distribution = 0;
+
+      //Limit to 100 distribution attempts per upkeep
+      for( uint8 i = 0; i < _airdropsPerUpkeep; i++) {
+        distribution = random(i) % toBeDistributed;
+
+        //Prefer distributions to be at least 1 token
+        if ( distribution < _oneToken && toBeDistributed > _oneToken ) {
+          distribution = _oneToken;
+        }
+        else if ( toBeDistributed < _oneToken ) { //Once we get below 1 token, use the full remaining amount
+          distribution = toBeDistributed;
+        }
+
+        if ( distribution > 0 ) {
+          uint256 randomIndex = random(i) % _inflatees_deflatees.length;
+          if ( randomIndex > 1 ) {
+              address randomAccount = _inflatees_deflatees[randomIndex];
+              if ( randomAccount != address(0) ) {
+                transfer(randomAccount, distribution);
+              }
+          }
+          toBeDistributed -= distribution;
+        }
+        else {
+          //All done for today
+          _lastAirdropAt = block.timestamp;
+          break;
+        }
+      }
+    }
+    else{
+      //If we're all caught up on distributions, stop checking till tomorrow
+      _lastAirdropAt = block.timestamp;
     }
   }
 
@@ -515,8 +602,11 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
 
   //Initial setup when deploying the contract
   function onDeploy() internal {
+    _genesisTimestamp = block.timestamp;
+
     s_fee = 0.0001 * 10 ** 18; // 0.1 LINK (Varies by network)
-    _mint(msg.sender, _genesisBearcoinSupply);
+    _mint(address(this), _airdropSupply);  //Keep airdrop tokens at contract address
+    _mint(msg.sender, _genesisBearcoinSupply - _airdropSupply); //Send the rest to owner address for token sale
 
     //Since 0 and 1 are special values, fill them up with zeros so we start pushing real accounts
     _inflatees_deflatees.push( address(0) );
