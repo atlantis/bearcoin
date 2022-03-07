@@ -31,7 +31,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint256 internal _lastAirdropAt = 0;
   uint256 internal _airdropsPerUpkeep = 20;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
   uint8 internal _forceStartAirdropDays = 60; //If the owner hasn't started the airdrop after this many days, force it to start
-  uint256 internal constant _minPreferredAirdrop = 100 * _oneToken;  //Minimum amount of each airdrop (though if necessary we'll do less)
+  uint256 internal constant _minPreferredAirdrop = 100 * _oneToken;  //Minimum amount of each airdrop (though on the last distribution we'll probably do less)
 
   uint8 internal constant _maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate
   Deflation[_maxPendingDeflationCount] internal _pendingDeflation; //Tracks deflation for the current transaction and the previous ones
@@ -221,7 +221,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     //1 is a special case meaning "inflation/deflation is enabled on this account but balance of 0 so not in the pool"
     _inflatees_deflatees_map[account] = 1;
   }
-
+event Info(address account, uint256 index);
   function _addInflateeDeflatee(address account) internal {
     uint256 currentIndex = _inflatees_deflatees_map[account];
     bool poolEligible = balanceLessDeflationOf(account) >= minInflationPoolBalance;
@@ -265,6 +265,8 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
       if ( currentIndex != addedIndex ) {
         _inflatees_deflatees_map[account] = addedIndex;
       }
+
+      emit Info(account, addedIndex);
     }
   }
 
