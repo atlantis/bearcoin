@@ -23,7 +23,7 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
   uint256 private constant _secondsPerDay = 86400;
 
   uint256 private _genesisTimestamp = 0;
-  uint256 private _genesisBitcoinPrice = 3630970000000;  //Only reason it's not a constant is so we can mess with it in dev mode
+  uint256 private constant _genesisBitcoinPrice = 3630970000000;
   uint256 private constant _genesisBearcoinSupply = 21000000 * _oneToken;
 
   uint256 private _airdropStartAt = 0;
@@ -68,7 +68,6 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
   event FetchedBitcoinPrice(uint256 unixtime, int256 price);
   event ReceivedInflation(address recipient, uint256 amount);
   event BurnedDeflation(address account, uint256 amount);
-  event ReplenishedDeflation(uint256 amount);
   event InflationDeflationEnabled(address account);
   event Airdrop(address account, uint256 amount);
   event InsufficientLINK();
@@ -519,7 +518,7 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
   }
 
   //Returns the genesis bitcoin price
-  function genesisBitcoinPrice() public view returns (uint256) {
+  function genesisBitcoinPrice() public pure returns (uint256) {
     return _genesisBitcoinPrice;
   }
 

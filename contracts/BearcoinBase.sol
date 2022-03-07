@@ -69,7 +69,6 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   event FetchedBitcoinPrice(uint256 unixtime, int256 price);
   event ReceivedInflation(address recipient, uint256 amount);
   event BurnedDeflation(address account, uint256 amount);
-  event ReplenishedDeflation(uint256 amount);
   event InflationDeflationEnabled(address account);
   event Airdrop(address account, uint256 amount);
   event InsufficientLINK();

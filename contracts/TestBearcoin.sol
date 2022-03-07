@@ -68,11 +68,12 @@ contract TestBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerB
   event FetchedBitcoinPrice(uint256 unixtime, int256 price);
   event ReceivedInflation(address recipient, uint256 amount);
   event BurnedDeflation(address account, uint256 amount);
-  event ReplenishedDeflation(uint256 amount);
   event InflationDeflationEnabled(address account);
   event Airdrop(address account, uint256 amount);
   event InsufficientLINK();
   event DailyAirdropComplete();
+
+  /* DEV/TEST EVENTS */
 
   event DebugUint256(uint256 value);
   event DebugAddress(address value);
