@@ -75,7 +75,6 @@ contract DevBearcoin is BearcoinBase {
 
   function devSetAirdropStartAt( uint256 timestamp ) public onlyOwner {
     _airdropStartAt = timestamp;
-    emit DebugUint256(_airdropStartAt);
   }
 
   function devAirdrop() external onlyOwner {

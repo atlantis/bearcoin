@@ -91,34 +91,34 @@ contract("Bearcoin", accounts => {
       await bearcoin.transfer(accounts[9], 100 * oneCoin);
     }
 
-    // let airdropStartAt = await bearcoin.airdropStartAt.call();
-    // if ( airdropStartAt.toNumber() == 0 ){
-    //   await bearcoin.startAirdrop();
-    // }
+    let airdropStartAt = await bearcoin.airdropStartAt.call();
+    if ( airdropStartAt.toNumber() == 0 ){
+      await bearcoin.startAirdrop();
+    }
   });
 
-  // it("should not distribute anything the first day", async () => {
-  //   await bearcoin.performUpkeep('0x1b');
+  it("should not distribute anything the first day", async () => {
+    //Make sure the airdrop start at is set to today
+    await bearcoin.devSetAirdropStartAt(Math.round(new Date().getTime() / 1000) - 600);
+    await bearcoin.devAirdrop();
 
-  //   let airdropDistributed = await bearcoin.airdropDistributed();
-  //   assert.equal(
-  //     airdropDistributed.toString(),
-  //     "0",
-  //     "airdrop does not distribute anything the first day"
-  //   );
-  // });
+    let airdropDistributed = await bearcoin.airdropDistributed();
+    assert.equal(
+      airdropDistributed.toString(),
+      "0",
+      "airdrop does not distribute anything the first day"
+    );
+  });
 
   it("should complete the first day's airdrop", async () => {
-    // var balanceAccount7 = await bearcoin.balanceOf.call(accounts[7]);
-    // var balanceAccount8 = await bearcoin.balanceOf.call(accounts[8]);
-    // var balanceAccount9 = await bearcoin.balanceOf.call(accounts[9]);
+    //This should be the entirity of the inflation pool
+    var balanceAccount7 = await bearcoin.balanceOf.call(accounts[7]);
+    var balanceAccount8 = await bearcoin.balanceOf.call(accounts[8]);
+    var balanceAccount9 = await bearcoin.balanceOf.call(accounts[9]);
+
+    let startBalanceTotal = balanceAccount7.toNumber() + balanceAccount8.toNumber() + balanceAccount9.toNumber();
 
     //move the start back in time 24h 1s and run the drop
-    // await bearcoin.devSetGenesisTimestamp(Math.round(new Date().getTime() / 1000) - 61*24*60*60);
-    // await bearcoin.devSetLastUpkeepAt(Math.round(new Date().getTime() / 1000) - (60*60*60));
-    //await bearcoin.performUpkeep('0x1b');
-
-    await bearcoin.startAirdrop();
     await bearcoin.devSetAirdropStartAt(Math.round(new Date().getTime() / 1000) - (1*24*60*60 + 1));
 
     let days = await bearcoin.daysIntoAirdrop.call();
@@ -128,15 +128,25 @@ contract("Bearcoin", accounts => {
       "one day into airdrop"
     );
 
-    await bearcoin.performUpkeep('0x1b');
-
     let dailyAirdropAmount = await bearcoin.dailyAirdropAmount.call();
-    let airdropDistributed = await bearcoin.airdropDistributed();
+    await bearcoin.devAirdrop();
 
+    let airdropDistributed = await bearcoin.airdropDistributed();
     assert.equal(
       airdropDistributed.toString(),
       dailyAirdropAmount.toString(),
       "total distributed after first drop matches daily amount"
+    );
+
+    balanceAccount7 = await bearcoin.balanceOf.call(accounts[7]);
+    balanceAccount8 = await bearcoin.balanceOf.call(accounts[8]);
+    balanceAccount9 = await bearcoin.balanceOf.call(accounts[9]);
+
+    let endBalanceTotal = balanceAccount7.toNumber() + balanceAccount8.toNumber() + balanceAccount9.toNumber();
+    assert.equal(
+      (endBalanceTotal - startBalanceTotal).toString(),
+      dailyAirdropAmount.toString(),
+      "total airdrop ended up in inflation pool addresses"
     );
   });
 });

@@ -29,8 +29,9 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint256 internal _airdropStartAt = 0;
   uint256 internal constant _airdropSupply = _genesisBearcoinSupply * 38 / 100;
   uint256 internal _lastAirdropAt = 0;
-  uint256 internal _airdropsPerUpkeep = 50;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
+  uint256 internal _airdropsPerUpkeep = 20;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
   uint8 internal _forceStartAirdropDays = 60; //If the owner hasn't started the airdrop after this many days, force it to start
+  uint256 internal constant _minPreferredAirdrop = 100 * _oneToken;  //Minimum amount of each airdrop (though if necessary we'll do less)
 
   uint8 internal constant _maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate
   Deflation[_maxPendingDeflationCount] internal _pendingDeflation; //Tracks deflation for the current transaction and the previous ones
@@ -69,7 +70,9 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   event BurnedDeflation(address account, uint256 amount);
   event ReplenishedDeflation(uint256 amount);
   event InflationDeflationEnabled(address account);
+  event Airdrop(address account, uint256 amount);
   event InsufficientLINK();
+  event DailyAirdropComplete();
 
   function decimals() public view virtual override returns (uint8) {
     return 8;
@@ -226,7 +229,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     //Only add them if they're not there already (or there but not in the pool and now they have a pool-worthy balance)
     if ( currentIndex == 0 || (currentIndex == 1 && poolEligible) ) {
       if ( currentIndex == 0) {
-        emit InflationDeflationEnabled( _msgSender() );
+        emit InflationDeflationEnabled( account );
       }
 
       //Default is special value 1 meaning "enabled but zero balance"
@@ -236,13 +239,14 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
       if ( poolEligible ) {
         //Try to find an empty slot to pop them in (to keep the array dense)
         bool added = false;
-        for ( uint8 i = 0; i < 100; i++ ) {
-          uint256 randomIndex = random(i) % _inflatees_deflatees.length;
+        uint256 poolSize = _inflatees_deflatees.length;
+        for ( uint8 i = 0; i < 50; i++ ) {
+          uint256 randomIndex = random(i) % poolSize;
 
           //Ignore 0 and 1 since those are special
-          if ( randomIndex > 1 ) {
+          if ( randomIndex > 1 && randomIndex < poolSize ) {
             if ( _inflatees_deflatees[randomIndex] == address(0) ) {
-              _inflatees_deflatees[randomIndex] = _msgSender();
+              _inflatees_deflatees[randomIndex] = account;
               added = true;
               addedIndex = randomIndex;
               break;
@@ -252,14 +256,14 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
 
         //Append only if we didn't find a blank one
         if ( !added ) {
-          _inflatees_deflatees.push( _msgSender() );
-          addedIndex = _inflatees_deflatees.length - 1;
+          _inflatees_deflatees.push( account );
+          addedIndex = poolSize;  //since we just added one
         }
       }
 
       //Now add the proper index to the mapping (if something's different)
       if ( currentIndex != addedIndex ) {
-        _inflatees_deflatees_map[_msgSender()] = addedIndex;
+        _inflatees_deflatees_map[account] = addedIndex;
       }
     }
   }
@@ -573,15 +577,10 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     return _airdropSupply / 365;
   }
 
-event SecondDiff(uint256 value);
-  function daysIntoAirdrop() public  returns ( uint256 ) {
-    emit SecondDiff(block.timestamp );
-    emit SecondDiff( _airdropStartAt);
+  function daysIntoAirdrop() public view returns ( uint256 ) {
     return ((block.timestamp - _airdropStartAt) / 86400);
   }
 
-event DaysIntoAirdrop(uint256 value);
-event ShouldHaveBeen(uint256 value);
   //Called by upkeep to distribute airdrops every day
   function airdrop() internal {
     //How much was actually distributed by now?
@@ -590,46 +589,53 @@ event ShouldHaveBeen(uint256 value);
     //How much should have been distributed by now?
     uint256 shouldHaveBeenDistributed = dailyAirdropAmount() * daysIntoAirdrop();
 
-    emit DaysIntoAirdrop(daysIntoAirdrop());
-    emit ShouldHaveBeen(shouldHaveBeenDistributed);
-
     if ( distributed < shouldHaveBeenDistributed ) {
       //Distribute the difference
       uint256 toBeDistributed = shouldHaveBeenDistributed - distributed;
       uint256 distribution = 0;
 
-      //Limit to 100 distribution attempts per upkeep
-      for( uint8 i = 0; i < _airdropsPerUpkeep; i++) {
-        distribution = random(i) % toBeDistributed;
-
-        //Prefer distributions to be at least 1 token
-        if ( distribution < _oneToken && toBeDistributed > _oneToken ) {
-          distribution = _oneToken;
+      for( uint256 i = 0; i < _airdropsPerUpkeep; i++) {
+        if ( toBeDistributed > 0 ) {
+          distribution = random(i) % toBeDistributed;
         }
-        else if ( toBeDistributed < _oneToken ) { //Once we get below 1 token, use the full remaining amount
+        else {
+          //All done
+          break;
+        }
+
+        //Prefer distributions to be at least _minPreferredAirdrop
+        if ( distribution < _minPreferredAirdrop && toBeDistributed > _minPreferredAirdrop ) {
+          distribution = _minPreferredAirdrop;
+        }
+        else if ( toBeDistributed < _minPreferredAirdrop ) { //Once we get below 1 token, use the full remaining amount
           distribution = toBeDistributed;
         }
 
         if ( distribution > 0 ) {
           uint256 randomIndex = random(i) % _inflatees_deflatees.length;
-          if ( randomIndex > 1 ) {
+
+          //can't ever run off the end if random() is real small so check end bound too
+          if ( randomIndex > 1 && randomIndex < _inflatees_deflatees.length ) {
               address randomAccount = _inflatees_deflatees[randomIndex];
               if ( randomAccount != address(0) ) {
-                transfer(randomAccount, distribution);
+                _transfer(address(this), randomAccount, distribution);
+                emit Airdrop(randomAccount, distribution);
+                toBeDistributed -= distribution;
               }
           }
-          toBeDistributed -= distribution;
         }
         else {
           //All done for today
-          _lastAirdropAt = block.timestamp;
           break;
         }
       }
     }
-    else{
-      //If we're all caught up on distributions, stop checking till tomorrow
+
+    //If we're all caught up on distributions, stop checking till tomorrow
+    distributed = airdropDistributed();
+    if ( distributed == shouldHaveBeenDistributed ) {
       _lastAirdropAt = block.timestamp;
+      emit DailyAirdropComplete();
     }
   }
 
