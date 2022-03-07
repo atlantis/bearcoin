@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -35,7 +35,7 @@ contract("Bearcoin", accounts => {
 
     let totalSupply = await bearcoin.totalSupply();
 
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1050 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1050 / 1000);
     await bearcoin.transfer(account, 100);
 
     var balance = await bearcoin.balanceOf.call(account);
@@ -59,7 +59,7 @@ contract("Bearcoin", accounts => {
 
     let totalSupply = await bearcoin.totalSupply();
 
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1050 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1050 / 1000);
     await bearcoin.transfer(account, 10);
     var balance = await bearcoin.balanceOf.call(account);
     assert.equal(
@@ -80,7 +80,7 @@ contract("Bearcoin", accounts => {
   it("should have working deflation for very small amounts", async () => {
     let account = accounts[6];
 
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 985000 / 1000000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 985000 / 1000000);
     await bearcoin.transfer(account, 100);
 
     let totalSupply = await bearcoin.totalSupply();
@@ -102,7 +102,7 @@ contract("Bearcoin", accounts => {
   });
 });
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -123,7 +123,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should be able to transfer 100 tokens during max inflation", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1100 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1100 / 1000);
 
     var balanceAccount7 = await bearcoin.balanceOf.call(accounts[7]);
     var balanceAccount8 = await bearcoin.balanceOf.call(accounts[8]);
@@ -155,7 +155,7 @@ contract("Bearcoin", accounts => {
 });
 
 //Have to reset the total supply for this to work due to rounding
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -170,9 +170,9 @@ contract("Bearcoin", accounts => {
     let totalSupply = await bearcoin.totalSupply();
 
     await bearcoin.enableInflationDeflation({from: account});
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 900 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 900 / 1000);
 
-    let inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount(amount);
+    let inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount(amount);
     assert.equal(
       inflateOrDeflateAmount.toString(),
       (amount * 950 / 1000).toString(),
@@ -211,7 +211,7 @@ contract("Bearcoin", accounts => {
 
 
 //Have to reset the total supply for this to work due to rounding
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -225,10 +225,10 @@ contract("Bearcoin", accounts => {
     let amount = oneCoin * 100;
     let totalSupply = await bearcoin.totalSupply();
 
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 985 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 985 / 1000);
     await bearcoin.enableInflationDeflation({from: account});
 
-    let inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(amount);
+    let inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(amount);
     assert.equal(
       inflateOrDeflateAmount.toString(),
       "9850000000",
@@ -265,7 +265,7 @@ contract("Bearcoin", accounts => {
   });
 });
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -292,7 +292,7 @@ contract("Bearcoin", accounts => {
 
   it("should not change the total supply when no inflation/deflation", async () => {
     let account = accounts[8];
-    await bearcoin.testSetBitcoinPrice(genesisPrice);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice);
 
     let totalSupply = await bearcoin.totalSupply();
 

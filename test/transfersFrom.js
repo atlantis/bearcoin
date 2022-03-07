@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -14,7 +14,7 @@ contract("Bearcoin", accounts => {
     let account2 = accounts[4];
 
     await bearcoin.enableInflationDeflation({from: account2});
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 985 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 985 / 1000);
     await bearcoin.transfer(account1, oneCoin * 120);
 
     let totalSupply = await bearcoin.totalSupply();
@@ -70,7 +70,7 @@ contract("Bearcoin", accounts => {
 //     let account2 = accounts[6];
 
 //     await bearcoin.enableInflationDeflation({from: account2});
-//     await bearcoin.testSetBitcoinPrice(genesisPrice * 1100 / 1000); //will be capped at 5%
+//     await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1100 / 1000); //will be capped at 5%
 //     await bearcoin.transfer(account1, oneCoin * 120);
 
 //     let amount = await bearcoin.balanceOf.call(account1);

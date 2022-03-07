@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   beforeEach('should setup the contract instance', async () => {
     bearcoin = await Bearcoin.deployed();
@@ -8,7 +8,7 @@ contract("Bearcoin", accounts => {
 
   it("should pause price updates if zero value is encountered", async () => {
     let genesisPrice = await bearcoin.genesisBitcoinPrice();
-    await bearcoin.testSetBitcoinPrice(genesisPrice.toNumber() + 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice.toNumber() + 1000);
 
     var paused = await bearcoin.inflationDeflationPaused.call();
     assert.equal(
@@ -17,7 +17,7 @@ contract("Bearcoin", accounts => {
       "inflation rate updates paused"
     );
 
-    await bearcoin.testSetBitcoinPrice(0);
+    await bearcoin.devSetCurrentBitcoinPrice(0);
     paused = await bearcoin.inflationDeflationPaused.call();
 
     assert.equal(
@@ -35,7 +35,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should pause price updates if >20% change value is encountered", async () => {
-    await bearcoin.testSetBitcoinPrice(100);
+    await bearcoin.devSetCurrentBitcoinPrice(100);
 
     var paused = await bearcoin.inflationDeflationPaused.call();
     assert.equal(
@@ -53,7 +53,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should resume price updates after 7 days, even with a bad value", async () => {
-    await bearcoin.testSetBitcoinPrice(100);
+    await bearcoin.devSetCurrentBitcoinPrice(100);
 
     var paused = await bearcoin.inflationDeflationPaused.call();
     assert.equal(
@@ -69,9 +69,9 @@ contract("Bearcoin", accounts => {
       "inflation coef not 1000000"
     );
 
-    await bearcoin.testSetLastRateUpdateAt( Math.round((new Date().getTime()) / 1000 ) - 604800 - 60 );
+    await bearcoin.devSetLastRateUpdateAt( Math.round((new Date().getTime()) / 1000 ) - 604800 - 60 );
 
-    await bearcoin.testSetBitcoinPrice(100);
+    await bearcoin.devSetCurrentBitcoinPrice(100);
 
     paused = await bearcoin.inflationDeflationPaused.call();
     assert.equal(

@@ -15,6 +15,7 @@ struct Deflation {
     uint256 amount;
 }
 
+//This contract was used as the base for Dev and Test versions, then copied and hardened (internal->private) into simpler versions without inheritance for production
 abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase {
   bool internal _inflationDeflationPaused = false;  //Used temporarily in case of price data failure...
   bool internal _rateLimitUpdateInflationRate = true;
@@ -48,7 +49,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   //Every address which has enabled inflation/deflation
   address[] private _inflatees_deflatees;
   mapping(address => uint256) private _inflatees_deflatees_map;
-  uint8 internal constant minInflationPoolBalance = 100;
+  uint8 internal constant _minInflationPoolBalance = 100;
 
   //Randomness
   uint32 internal constant _randomSeedUpdateSeconds = 3600;
@@ -60,7 +61,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint32 internal constant _upkeepSeconds = 200;
 
   //Don't let the bitcoin price be updated more than every few seconds
-  uint32 internal constant bitcoinPriceUpdateRateLimitSeconds = 10;
+  uint32 internal constant _bitcoinPriceUpdateRateLimitSeconds = 10;
 
   event RateUpdateFailure(uint256 unixtime, uint8 diffPercent);
   event RateUpdateSuccess(uint256 unixtime, uint32 inflationCoef);
@@ -194,7 +195,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
         require(senderBalance >= amount, "transfer amount (including pending deflation) exceeds balance");
 
         //Now remove the sender from the inflation pool if they have too small a balance
-        if ( senderBalance - amount < minInflationPoolBalance ) {
+        if ( senderBalance - amount < _minInflationPoolBalance ) {
           _removeFromInflationDeflationPool(sender);
         }
       }
@@ -221,10 +222,10 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     //1 is a special case meaning "inflation/deflation is enabled on this account but balance of 0 so not in the pool"
     _inflatees_deflatees_map[account] = 1;
   }
-event Info(address account, uint256 index);
+
   function _addInflateeDeflatee(address account) internal {
     uint256 currentIndex = _inflatees_deflatees_map[account];
-    bool poolEligible = balanceLessDeflationOf(account) >= minInflationPoolBalance;
+    bool poolEligible = balanceLessDeflationOf(account) >= _minInflationPoolBalance;
 
     //Only add them if they're not there already (or there but not in the pool and now they have a pool-worthy balance)
     if ( currentIndex == 0 || (currentIndex == 1 && poolEligible) ) {
@@ -265,8 +266,6 @@ event Info(address account, uint256 index);
       if ( currentIndex != addedIndex ) {
         _inflatees_deflatees_map[account] = addedIndex;
       }
-
-      emit Info(account, addedIndex);
     }
   }
 
@@ -328,7 +327,7 @@ event Info(address account, uint256 index);
   //Can be called by anyone to update the inflation rate (subject to rate limiting)
   function updateInflationDeflationRate() public returns (bool)  {
     if ( _rateLimitUpdateInflationRate ) {
-      require(block.timestamp >= _lastRateUpdateAt + bitcoinPriceUpdateRateLimitSeconds, "updateInflationDeflationRate: can only be called once per minute");
+      require(block.timestamp >= _lastRateUpdateAt + _bitcoinPriceUpdateRateLimitSeconds, "updateInflationDeflationRate: can only be called once per minute");
     }
 
     uint256 previousBitcoinPrice = _bitcoinPrice;
@@ -533,7 +532,7 @@ event Info(address account, uint256 index);
 
     if ( random(1) % 3 == 1 ) {
       //Don't even try if we'd fail
-      if ( block.timestamp >= _lastRateUpdateAt + bitcoinPriceUpdateRateLimitSeconds ) {
+      if ( block.timestamp >= _lastRateUpdateAt + _bitcoinPriceUpdateRateLimitSeconds ) {
         updateInflationDeflationRate();
       }
     }

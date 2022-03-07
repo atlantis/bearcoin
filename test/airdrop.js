@@ -1,7 +1,7 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 const oneCoin = 100000000;
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   beforeEach('should setup the contract instance', async () => {
     bearcoin = await Bearcoin.deployed();
@@ -29,7 +29,7 @@ contract("Bearcoin", accounts => {
   });
 });
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   beforeEach('should setup the contract instance', async () => {
     bearcoin = await Bearcoin.deployed();
@@ -66,7 +66,7 @@ contract("Bearcoin", accounts => {
   });
 });
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   beforeEach('should setup the contract instance and inflation pool and start the airdrop', async () => {
     bearcoin = await Bearcoin.deployed();

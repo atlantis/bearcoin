@@ -1,6 +1,6 @@
 const Bearcoin = artifacts.require("TestBearcoin");
 
-contract("Bearcoin", accounts => {
+contract("TestBearcoin", accounts => {
   let bearcoin;
   let genesisPrice;
   let oneCoin = 100000000;
@@ -51,7 +51,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should max inflation out at 5%", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1100000 / 1000000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1100000 / 1000000);
     let inflationCoef = await bearcoin.inflationCoef();
     assert.equal(
       inflationCoef.valueOf().toNumber(),
@@ -61,7 +61,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should max deflation out at 5%", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 900 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 900 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
     assert.equal(
       inflationCoef.valueOf().toNumber(),
@@ -71,7 +71,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should calculate the 1% inflation coef correctly", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1010 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1010 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
     assert.equal(
       inflationCoef.valueOf().toNumber(),
@@ -81,7 +81,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should calculate the 1.5% inflation coef correctly", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1015 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1015 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
     assert.equal(
       inflationCoef.valueOf().toNumber(),
@@ -91,7 +91,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should calculate the 1% deflation coef correctly", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 990 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 990 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
 
     assert.equal(
@@ -102,7 +102,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should calculate the 1.5% deflation coef correctly", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 985 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 985 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
 
     assert.equal(
@@ -113,7 +113,7 @@ contract("Bearcoin", accounts => {
   });
 
   it("should know which transaction amounts are inflation poolable", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 990 / 1000);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 990 / 1000);
     let inflationCoef = await bearcoin.inflationCoef();
 
     assert.equal(
@@ -124,8 +124,8 @@ contract("Bearcoin", accounts => {
   });
 
   it("should calculate correct inflate/deflate amounts", async () => {
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 1010 / 1000);
-    var inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1010 / 1000);
+    var inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100);
 
     assert.equal(
       inflateOrDeflateAmount,
@@ -133,8 +133,8 @@ contract("Bearcoin", accounts => {
       "1% inflation on 0.00000100 not correct"
     );
 
-    await bearcoin.testSetBitcoinPrice(genesisPrice * 990 / 1000);
-    inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100);
+    await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 990 / 1000);
+    inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100);
 
       assert.equal(
         inflateOrDeflateAmount,
@@ -142,8 +142,8 @@ contract("Bearcoin", accounts => {
         "1% deflation on 0.00000100 not correct"
       );
 
-      await bearcoin.testSetBitcoinPrice(genesisPrice * 1100 / 1000);
-      inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100);
+      await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1100 / 1000);
+      inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100);
 
       assert.equal(
         inflateOrDeflateAmount,
@@ -151,8 +151,8 @@ contract("Bearcoin", accounts => {
         "max deflation on 0.00000100 not correct"
       );
 
-      await bearcoin.testSetBitcoinPrice(genesisPrice * 900 / 1000);
-      inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100);
+      await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 900 / 1000);
+      inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100);
 
       assert.equal(
         inflateOrDeflateAmount,
@@ -160,17 +160,17 @@ contract("Bearcoin", accounts => {
         "max deflation on 0.00000100 not correct"
       );
 
-      await bearcoin.testSetBitcoinPrice(genesisPrice * 985 / 1000);
+      await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 985 / 1000);
 
-      inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100000000000);
+      inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100000000000);
       assert.equal(
         inflateOrDeflateAmount,
         98500000000,
         "1.5% inflation on 1 coin not correct"
       );
 
-      await bearcoin.testSetBitcoinPrice(genesisPrice * 1025 / 1000);
-      inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100000000);
+      await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 1025 / 1000);
+      inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100000000);
 
       assert.equal(
         inflateOrDeflateAmount,
@@ -178,9 +178,9 @@ contract("Bearcoin", accounts => {
         "2.5% inflation on 1 coin not correct"
       );
 
-      await bearcoin.testSetBitcoinPrice(genesisPrice * 975 / 1000);
+      await bearcoin.devSetCurrentBitcoinPrice(genesisPrice * 975 / 1000);
 
-      inflateOrDeflateAmount = await bearcoin.testInflateOrDeflateAmount.call(100000000);
+      inflateOrDeflateAmount = await bearcoin.devInflateOrDeflateAmount.call(100000000);
       assert.equal(
         inflateOrDeflateAmount,
         97500000,

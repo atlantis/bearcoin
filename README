@@ -1,8 +1,9 @@
 CODE AUDIT
 
-The two contracts that need to be audited are:
+The only contract that needs to be audited is: Bearcoin.
 
-BearcoinBase
-Bearcoin
+The other two contracts are just for development/testing.
 
-The other two contracts are just for testing.
+Originally during development/testing, all three versions inherited from BearcoinBase,
+but for production use/audit/final testing, the inheritance was removed, visibility was locked down (internal->private),
+and then each version was slightly modified as necessary.
