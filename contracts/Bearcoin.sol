@@ -109,12 +109,11 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
       }
     }
   }
+
   //Returns the balanceOf an account, less pending deflation
   function balanceLessDeflationOf(address account) public view returns (uint256) {
     uint256 balance = balanceOf(account);
     uint256 pending = pendingDeflationOf(account);
-
-    require(balance >= pending, "insufficient balance (less pending deflation)");
 
     return balance - pending;
   }
@@ -195,10 +194,10 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
         uint256 correctAmount = inflateOrDeflateAmount(amount);
 
         if ( correctAmount > amount ) {
-          _inflate(correctAmount - amount); //Randomly allocate the inflation rate
+          _inflate(correctAmount - amount); //Randomly allocate the inflation
         }
         else if ( amount > correctAmount ) {
-          _allocateDeflation(sender, recipient, amount - correctAmount); //Burn from deflation reserve
+          _allocateDeflation(sender, recipient, amount - correctAmount); //Earmark deflation
         }
       }
 
@@ -232,10 +231,11 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
     }
 
     //Mark address as "not currently the pool"
-    //1 is a special case meaning "inflation/deflation is enabled on this account but balance of 0 so not in the pool"
+    //1 is a special case meaning "inflation/deflation is enabled on this account but below minimum balance so not in the pool"
     _inflatees_deflatees_map[account] = 1;
   }
 
+  //Adds an account to the inflatee/deflatee mapping and (balance permitting) to the inflation pool
   function _addInflateeDeflatee(address account) private {
     uint256 currentIndex = _inflatees_deflatees_map[account];
     bool poolEligible = balanceLessDeflationOf(account) >= _minInflationPoolBalance;
@@ -246,7 +246,7 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
         emit InflationDeflationEnabled( account );
       }
 
-      //Default is special value 1 meaning "enabled but zero balance"
+      //Default is special value 1 meaning "enabled but insufficient balance"
       uint256 addedIndex = 1;
 
       //If they deserve a spot in the pool, add them to _inflatees_deflatees as well
@@ -275,10 +275,8 @@ contract Bearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase 
         }
       }
 
-      //Now add the proper index to the mapping (if something's different)
-      if ( currentIndex != addedIndex ) {
-        _inflatees_deflatees_map[account] = addedIndex;
-      }
+      //Now add the proper index to the mapping
+      _inflatees_deflatees_map[account] = addedIndex;
     }
   }
 
