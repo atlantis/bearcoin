@@ -4,6 +4,4 @@ The only contract that needs to be audited is: Bearcoin.
 
 DevBearcoin and TestBearcoin are just for development/testing.
 
-Originally during development/testing, all three contracts inherited from the abstract BearcoinBase,
-but for production use/audit/final testing, the inheritance was removed, visibility was locked down (internal->private),
-and each version was slightly modified as necessary.
+Originally during development/testing, all three contracts inherited from the abstract BearcoinBase, but for production use/audit/final testing, the inheritance was removed, visibility was locked down (internal->private), and each version was slightly modified as necessary.
