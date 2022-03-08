@@ -18,7 +18,6 @@ struct Deflation {
 //This contract was used as the base for Dev and Test versions, then copied and hardened (internal->private) into simpler versions without inheritance for production
 abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase {
   bool internal _inflationDeflationPaused = false;  //Used temporarily in case of price data failure...
-  bool internal _rateLimitUpdateInflationRate = true;
   uint32 internal _inflationCoef = 1000000;  //1000000 = 1 = no change; valid range 950000 - 1050000 (since max 5% swing)
   uint256 internal constant _oneToken = 100000000;
   uint256 internal constant _secondsPerDay = 86400;
@@ -61,7 +60,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   uint32 internal constant _upkeepSeconds = 200;
 
   //Don't let the bitcoin price be updated more than every few seconds
-  uint32 internal constant _bitcoinPriceUpdateRateLimitSeconds = 10;
+  uint32 internal constant _bitcoinPriceUpdateRateLimitSeconds = 60;
 
   event RateUpdateFailure(uint256 unixtime, uint8 diffPercent);
   event RateUpdateSuccess(uint256 unixtime, uint32 inflationCoef);
@@ -267,7 +266,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
 
   //Uses a truly random seed plus some block information plus a one-time use seed
   function random(uint256 callSeed) private view returns (uint256) {
-    return uint(keccak256(abi.encodePacked(_randomSeed, block.difficulty, block.timestamp, callSeed)));
+    return uint256(keccak256(abi.encodePacked(_randomSeed, block.difficulty, block.timestamp, callSeed)));
   }
 
   //Uses the _inflationCoef to calculate a new inflated/deflated amount
@@ -322,9 +321,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
 
   //Can be called by anyone to update the inflation rate (subject to rate limiting)
   function updateInflationDeflationRate() public returns (bool)  {
-    if ( _rateLimitUpdateInflationRate ) {
-      require(block.timestamp >= _lastRateUpdateAt + _bitcoinPriceUpdateRateLimitSeconds, "updateInflationDeflationRate: can only be called once per minute");
-    }
+    require(block.timestamp >= _lastRateUpdateAt + _bitcoinPriceUpdateRateLimitSeconds, "too many requests");
 
     uint256 previousBitcoinPrice = _bitcoinPrice;
     int256 rawBitcoinPrice = _fetchBitcoinPrice();
@@ -334,6 +331,10 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
     //Never, ever allow a bitcoin price of zero or negative
     if ( rawBitcoinPrice > 0 ) {
       latestBitcoinPrice = uint256(rawBitcoinPrice);
+    }
+    else {
+      _inflationDeflationPaused = true;
+      return false;
     }
 
     //Require reasonable changes (otherwise wait until forced reset)
@@ -398,14 +399,16 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
   //Randomly distribute tokens to an address in the inflation pool, weighted by balance -
   //we ignore pending deflation for performance/gas cost reasons
   function _inflate(uint256 amount) private {
-    if ( amount > 0 && _inflatees_deflatees.length > 0 ){
+    if ( amount > 0 ){
       address recipient = address(0);
       uint256 eachBalance = 0;
-      address randomAccount;
-      uint256 randomIndex;
+      address randomAccount = address(0);
+      uint256 randomIndex = 0;
+
+      uint256 poolSize = _inflatees_deflatees.length;
 
       //One tenth of one percent of inflation goes to maintenance costs
-      if ( random(_inflatees_deflatees.length) % 1000 == 500 ) {
+      if ( random(poolSize) % 1000 == 500 ) {
         recipient = owner();
       }
       else {
@@ -415,10 +418,10 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
           uint256 maxBalance = 0;
 
           for (uint8 i = 0; i < 10; i++) {
-            randomIndex = random(i) % _inflatees_deflatees.length;
+            randomIndex = random(i) % poolSize;
 
             //Ignore 0 and 1, as they're special values
-            if ( randomIndex > 1 ) {
+            if ( randomIndex > 1 && randomIndex < poolSize ) {
               randomAccount = _inflatees_deflatees[randomIndex];
               if ( randomAccount != address(0) ) {
                 eachBalance = balanceOf(randomAccount);
@@ -604,7 +607,7 @@ abstract contract BearcoinBase is ERC20, Ownable, KeeperCompatibleInterface, VRF
         if ( distribution < _minPreferredAirdrop && toBeDistributed > _minPreferredAirdrop ) {
           distribution = _minPreferredAirdrop;
         }
-        else if ( toBeDistributed < _minPreferredAirdrop ) { //Once we get below 1 token, use the full remaining amount
+        else if ( toBeDistributed < _minPreferredAirdrop ) { //Once the total amount remaining drops below the minimum preferred amount, use the full remaining amount
           distribution = toBeDistributed;
         }
 
