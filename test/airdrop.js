@@ -35,26 +35,6 @@ contract("TestBearcoin", accounts => {
     bearcoin = await Bearcoin.deployed();
   });
 
-  it("should start the airdrop manually", async () => {
-    await bearcoin.performUpkeep('0x1b');
-
-    var airdropStartAt = await bearcoin.airdropStartAt.call();
-    assert.equal(
-      airdropStartAt.toString(),
-      "0",
-      "airdrop starts out disabled"
-    );
-
-    await bearcoin.startAirdrop();
-
-    airdropStartAt = await bearcoin.airdropStartAt.call();
-    assert.notEqual(
-      airdropStartAt.toString(),
-      "0",
-      "airdrop enabled manually"
-    );
-  });
-
   it("should start with the proper airdrop supply", async () => {
     let airdropSupply = await bearcoin.airdropSupply();
     let contractBalance = await bearcoin.balanceOf(bearcoin.address);
@@ -93,7 +73,7 @@ contract("TestBearcoin", accounts => {
 
     let airdropStartAt = await bearcoin.airdropStartAt.call();
     if ( airdropStartAt.toNumber() == 0 ){
-      await bearcoin.startAirdrop();
+      await bearcoin.devStartAirdrop();
     }
   });
 

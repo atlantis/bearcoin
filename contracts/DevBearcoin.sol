@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.10;
+pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -16,20 +16,19 @@ struct Deflation {
 }
 
 contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBase {
-  bool private _inflationDeflationPaused = false;  //Used temporarily in case of price data failure...
-  uint32 private _inflationCoef = 1000000;  //1000000 = 1 = no change; valid range 950000 - 1050000 (since max 5% swing)
-  uint256 private constant _oneToken = 100000000;
-  uint256 private constant _secondsPerDay = 86400;
+  bool private _inflationDeflationPaused;  //Used temporarily in case of price data failure...
+  uint32 private _inflationCoef = 1e6;  //1000000 = 1 = no change; valid range 950000 - 1050000 (since max 5% swing)
+  uint256 private constant _oneToken = 1e8;
 
-  uint256 private _genesisTimestamp = 0;
-  uint256 private _genesisBitcoinPrice = 3630970000000;  //Only reason it's not a constant is so we can mess with it in dev mode
-  uint256 private constant _genesisBearcoinSupply = 21000000 * _oneToken;
+  uint256 private _genesisTimestamp;
+  uint256 private _genesisBitcoinPrice = 363097e7;  //Only reason it's not a constant is so we can mess with it in dev mode
+  uint256 private constant _genesisBearcoinSupply = 21e6 * _oneToken;
 
-  uint256 private _airdropStartAt = 0;
+  uint256 private _airdropStartAt;
   uint256 private constant _airdropSupply = _genesisBearcoinSupply * 38 / 100;
-  uint256 private _lastAirdropAt = 0;
-  uint256 private _airdropsPerUpkeep = 20;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
-  uint8 private _forceStartAirdropDays = 60; //If the owner hasn't started the airdrop after this many days, force it to start
+  uint256 private _lastAirdropAt;
+  uint256 private constant _airdropsPerUpkeep = 20;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
+  uint8 private constant _startAirdropAfterDays = 60; //Start the airdrop after this many days
   uint256 private constant _minPreferredAirdrop = 100 * _oneToken;  //Minimum amount of each airdrop (though on the last distribution we'll probably do less)
 
   uint8 private constant _maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate
@@ -40,9 +39,9 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   uint256 private _bitcoinPrice = _genesisBitcoinPrice;
   uint256 private _desiredSupply = _genesisBearcoinSupply;
 
-  uint256 private _lastUpkeepAt = 0;
-  uint256 private _lastRateUpdateAt = 0;
-  uint256 private _lastRandomSeedUpdateAt = 0;
+  uint256 private _lastUpkeepAt;
+  uint256 private _lastRateUpdateAt;
+  uint256 private _lastRandomSeedUpdateAt;
 
   //Every address which has enabled inflation/deflation
   address[] private _inflatees_deflatees;
@@ -65,10 +64,10 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   event RateUpdateSuccess(uint256 unixtime, uint32 inflationCoef);
   event RandomSeedUpdateSuccess(uint256 unixtime);
   event FetchedBitcoinPrice(uint256 unixtime, int256 price);
-  event ReceivedInflation(address recipient, uint256 amount);
-  event BurnedDeflation(address account, uint256 amount);
+  event ReceivedInflation(address indexed recipient, uint256 amount);
+  event BurnedDeflation(address indexed account, uint256 amount);
   event InflationDeflationEnabled(address account);
-  event Airdrop(address account, uint256 amount);
+  event Airdrop(address indexed account, uint256 amount);
   event InsufficientLINK();
   event DailyAirdropComplete();
 
@@ -148,6 +147,10 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
     _airdropStartAt = timestamp;
   }
 
+  function devStartAirdrop() public onlyOwner {
+    _startAirdrop();
+  }
+
   function devAirdrop() external onlyOwner {
     airdrop();
   }
@@ -208,7 +211,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
     bool sender_enabled = inflationDeflationEnabled(sender);
     bool recipient_enabled = inflationDeflationEnabled(recipient);
 
-    if ( (sender_enabled && recipient_enabled) || recipient_enabled ) {
+    if ( recipient_enabled ) {
       //Recipient pays if both are enabled or just the recipient is enabled
       _pushPendingDeflation(recipient, amount);
     }
@@ -242,12 +245,12 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   }
 
   //Returns whether the _msgSender account account is subject to inflation/deflation
-  function inflationDeflationEnabled() public virtual returns (bool) {
+  function inflationDeflationEnabled() external virtual returns (bool) {
     return inflationDeflationEnabled( _msgSender() );
   }
 
   //Enables inflation/deflation on a particular account
-  function enableInflationDeflation() public virtual {
+  function enableInflationDeflation() external virtual {
     require(_msgSender() != owner(), "the owner account is not allowed to enable inflation/deflation");
     require(!inflationDeflationEnabled(_msgSender()), "inflation/deflation was already enabled on this account");
     _addInflateeDeflatee( _msgSender() );
@@ -332,7 +335,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
           uint256 randomIndex = random(i) % poolSize;
 
           //Ignore 0 and 1 since those are special
-          if ( randomIndex > 1 && randomIndex < poolSize ) {
+          if ( randomIndex > 1 ) {
             if ( _inflatees_deflatees[randomIndex] == address(0) ) {
               _inflatees_deflatees[randomIndex] = account;
               added = true;
@@ -361,7 +364,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
 
   //Uses the _inflationCoef to calculate a new inflated/deflated amount
   function inflateOrDeflateAmount(uint256 amount) private view returns (uint256)  {
-    uint256 newAmount = (amount * inflationCoef()) / 1000000;
+    uint256 newAmount = (amount * inflationCoef()) / 1e6;
     uint256 currentTotalSupply = totalSupplyLessPendingDeflation();
 
     //If we're inflating
@@ -475,11 +478,11 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
     }
     else {
       //(bearcoin_desired_supply / bearcoin_genesis_supply) = (bitcoin_current_price / bitcoin_genesis_price)
-      _desiredSupply = ((_bitcoinPrice * 1000000 / _genesisBitcoinPrice) * _genesisBearcoinSupply) / 1000000;
+      _desiredSupply = ( _bitcoinPrice * _genesisBearcoinSupply ) / _genesisBitcoinPrice;
 
       //Limit to 5% inflation/deflation, normalized to 1,000,000:
       //(desiredBearcoin / currentBearcoin) = (x / 1000000), then capped at +-5%
-      _inflationCoef = uint32( Math.max( Math.min( (((_desiredSupply * 1000000 / totalSupplyLessPendingDeflation()) * 1000000) / 1000000), 1050000 ), 950000) );
+      _inflationCoef = uint32( Math.max( Math.min( (_desiredSupply * 1e6 / totalSupplyLessPendingDeflation()), 105e4 ), 95e4) );
 
       emit RateUpdateSuccess(block.timestamp, inflationCoef());
       return true;
@@ -511,7 +514,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
             randomIndex = random(i) % poolSize;
 
             //Ignore 0 and 1, as they're special values
-            if ( randomIndex > 1 && randomIndex < poolSize ) {
+            if ( randomIndex > 1 ) {
               randomAccount = _inflatees_deflatees[randomIndex];
               if ( randomAccount != address(0) ) {
                 eachBalance = balanceOf(randomAccount);
@@ -540,26 +543,18 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
 
   //Fetches the latest bitcoin price
   function _fetchBitcoinPrice() private returns (int256) {
-    (
-        uint80 roundID,
-        int price,
-        uint startedAt,
-        uint timeStamp,
-        uint80 answeredInRound
-    ) = _priceFeed.latestRoundData();
-
+    (,int price,,,) = _priceFeed.latestRoundData();
     emit FetchedBitcoinPrice(block.timestamp, price);
-
     return price;
   }
 
   //Returns either _inflationCoef or (if inflation/deflation is paused), the default coef representing "no change"
   function inflationCoef() public view returns (uint32) {
-    return _inflationDeflationPaused ? 1000000 : _inflationCoef;
+    return _inflationDeflationPaused ? 1e6 : _inflationCoef;
   }
 
   //Returns the current bitcoin price
-  function bitcoinPrice() public view returns (uint256) {
+  function bitcoinPrice() external view returns (uint256) {
     return _bitcoinPrice;
   }
 
@@ -569,7 +564,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   }
 
   //Returns the timestamp when the airdrop started
-  function airdropStartAt() public view returns (uint256) {
+  function airdropStartAt() external view returns (uint256) {
     return _airdropStartAt;
   }
 
@@ -579,32 +574,32 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   }
 
   //Returns the amount of airdrop yet to be distributed
-  function airdropRemaining() public view returns (uint256) {
+  function airdropRemaining() external view returns (uint256) {
     return airdropSupply() - airdropDistributed();
   }
 
   //Returns the last airdrop completion timestamp
-  function lastAirdropAt() public view returns (uint256) {
+  function lastAirdropAt() external view returns (uint256) {
     return _lastAirdropAt;
   }
 
   //Returns the genesis bearcoin supply
-  function genesisBearcoinSupply() public pure returns (uint256) {
+  function genesisBearcoinSupply() external pure returns (uint256) {
     return _genesisBearcoinSupply;
   }
 
   //Returns the genesis bitcoin price
-  function genesisBitcoinPrice() public view returns (uint256) {
+  function genesisBitcoinPrice() external view returns (uint256) {
     return _genesisBitcoinPrice;
   }
 
   //Returns whether inflation/deflation is paused
-  function inflationDeflationPaused() public view returns (bool) {
+  function inflationDeflationPaused() external view returns (bool) {
     return _inflationDeflationPaused;
   }
 
   //Returns the current desired bearcoin supply
-  function desiredSupply() public view returns (uint256) {
+  function desiredSupply() external view returns (uint256) {
     return _desiredSupply;
   }
 
@@ -640,23 +635,18 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
     }
 
     if ( random(3) % 3 == 1 ) {
-      if ( _airdropStartAt > 0 && _lastAirdropAt < block.timestamp - _secondsPerDay && balanceOf(address(this)) > 0 ) {
+      if ( _airdropStartAt > 0 && _lastAirdropAt < block.timestamp - 1 days && balanceOf(address(this)) > 0 ) {
         //This may be called multiple times until the airdrop is complete for the current day
         airdrop();
       }
-      else if ( _airdropStartAt == 0 && block.timestamp > _genesisTimestamp + (_secondsPerDay * _forceStartAirdropDays) ) {
-        //Force the airdrop to start if it hasn't already after too long
+      else if ( _airdropStartAt == 0 && block.timestamp > _genesisTimestamp + (1 days * _startAirdropAfterDays) ) {
+        //Force the airdrop to start
         _startAirdrop();
       }
     }
   }
 
-  //Starts the airdrop (if this isn't called after _forceStartAirdropDays, the airdrop will be started anyway)
-  function startAirdrop() public onlyOwner {
-    _startAirdrop();
-  }
-
-  //Internal function to actually start the airdrop
+  //Internal function to start the airdrop
   function _startAirdrop() private {
     if ( _airdropStartAt == 0 ) {
       _airdropStartAt = block.timestamp;
@@ -668,7 +658,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
   }
 
   function daysIntoAirdrop() public view returns ( uint256 ) {
-    return ((block.timestamp - _airdropStartAt) / 86400);
+    return ((block.timestamp - _airdropStartAt) / 1 days);
   }
 
   //Called by upkeep to distribute airdrops every day
@@ -694,7 +684,7 @@ contract DevBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerBa
         }
 
         //Prefer distributions to be at least _minPreferredAirdrop
-        if ( distribution < _minPreferredAirdrop && toBeDistributed > _minPreferredAirdrop ) {
+        if ( distribution < _minPreferredAirdrop && toBeDistributed >= _minPreferredAirdrop ) {
           distribution = _minPreferredAirdrop;
         }
         else if ( toBeDistributed < _minPreferredAirdrop ) { //Once the total amount remaining drops below the minimum preferred amount, use the full remaining amount
