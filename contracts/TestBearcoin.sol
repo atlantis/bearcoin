@@ -28,7 +28,7 @@ contract TestBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerB
   uint256 private constant _airdropSupply = _genesisBearcoinSupply * 38 / 100;
   uint256 private _lastAirdropAt;
   uint256 private constant _airdropsPerUpkeep = 20;  //Max airdrop distributions a single upkeep run will attempt (must be <= than maxPendingDeflationCount, since we could need to deflate once for each airdrop)
-  uint8 private constant _startAirdropAfterDays = 60; //Start the airdrop after this many days
+  uint8 private constant _startAirdropAfterDays = 30; //Start the airdrop this many days after contract is deployed
   uint256 private constant _minPreferredAirdrop = 100 * _oneToken;  //Minimum amount of each airdrop (though on the last distribution we'll probably do less)
 
   uint8 private constant _maxPendingDeflationCount = 50;  //Only allow this many pending deflations to accumulate

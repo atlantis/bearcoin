@@ -17,7 +17,7 @@ contract("TestBearcoin", accounts => {
       "airdrop starts out disabled"
     );
 
-    await bearcoin.devSetGenesisTimestamp(Math.round(new Date().getTime() / 1000) - 61*24*60*60);
+    await bearcoin.devSetGenesisTimestamp(Math.round(new Date().getTime() / 1000) - 31*24*60*60);
     await bearcoin.performUpkeep('0x1b');
 
     airdropStartAt = await bearcoin.airdropStartAt.call();
