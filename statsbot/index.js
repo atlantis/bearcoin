@@ -3,7 +3,7 @@ const path = require('path')
 const cjson = require('cjson')
 const AWS = require('aws-sdk');
 
-const testnet = true;
+const testnet = (process.env.TESTNET == "1") || (process.env.TESTNET == "true");
 
 const BUCKET_NAME = 'bearcoin.io';
 
@@ -13,7 +13,7 @@ const s3 = new AWS.S3({
 });
 
 const blockchainProvider = testnet ? process.env.ALCHEMY_TEST_URL : process.env.ALCHEMY_URL
-const contractAddress = testnet ? '0xc76920A8e8393afc64D9eb6cBf3a210F64dC68E8' : 'TODO';
+const contractAddress = testnet ? '0xc76920A8e8393afc64D9eb6cBf3a210F64dC68E8' : '0x071bFF87c6BAff13e62AE71495a76C4388c29f42';
 
 const web3 = new Web3(blockchainProvider)
 var contract = null;
@@ -29,15 +29,20 @@ function getContract() {
 }
 
 async function getStats() {
-  var totalSupply = await getContract().methods.totalSupply().call() || '--'
-  var desiredSupply = await getContract().methods.desiredSupply().call() || '--'
-  var inflationCoef = await getContract().methods.inflationCoef().call() || '--'
+  var totalSupply = await getContract().methods.totalSupply().call();
+  var desiredSupply = await getContract().methods.desiredSupply().call();
+  var inflationCoef = await getContract().methods.inflationCoef().call();
+
+  var airdropDistributed = await getContract().methods.airdropDistributed().call();
+  var airdropRemaining = await getContract().methods.airdropRemaining().call();
 
   return {
     totalSupply: Math.round(totalSupply / 100000000),
     desiredSupply: Math.round(desiredSupply / 100000000),
     inflationCoef: inflationCoef,
-    timestamp:Math.floor(new Date().getTime()/1000)
+    timestamp: Math.floor(new Date().getTime()/1000),
+    airdropDistributed: Math.round(airdropDistributed / 100000000),
+    airdropRemaining: Math.round(airdropRemaining / 100000000)
   };
 }
 
@@ -62,3 +67,5 @@ async function run(){
 exports.handler = function(event, context, callback) {
   run();
 }
+
+run();

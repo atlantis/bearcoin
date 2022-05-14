@@ -94,7 +94,7 @@ module.exports = {
       from: '0x58CE2fAe38977781b01fCd5E3a1Beb374518fa1c',
       gas: 10000000,
       gasPrice: 50000000000
-    },
+    }
   },
 //
   // Set default mocha options here, use special reporters etc.
