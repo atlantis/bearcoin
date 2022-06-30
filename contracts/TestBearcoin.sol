@@ -49,7 +49,7 @@ contract TestBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerB
   uint8 private constant _minInflationPoolBalance = 100;
 
   //Randomness
-  uint32 private constant _randomSeedUpdateSeconds = 86400;
+  uint32 private constant _randomSeedUpdateSeconds = 2592000; //every 30 days
   bytes32 private s_keyHash;
   uint256 private s_fee;
   uint256 private _randomSeed = 1111111; //Will be updated periodically with truly random data
