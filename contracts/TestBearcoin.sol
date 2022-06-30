@@ -21,7 +21,7 @@ contract TestBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerB
   uint256 private constant _oneToken = 1e8;
 
   uint256 private _genesisTimestamp;
-  uint256 private _genesisBitcoinPrice = 363097e7;  //Only reason it's not a constant is so we can mess with it in dev mode
+  uint256 private _genesisBitcoinPrice = 200000e7;  //Only reason it's not a constant is so we can mess with it in dev mode
   uint256 private constant _genesisBearcoinSupply = 21e6 * _oneToken;
 
   uint256 private _airdropStartAt;
@@ -49,13 +49,13 @@ contract TestBearcoin is ERC20, Ownable, KeeperCompatibleInterface, VRFConsumerB
   uint8 private constant _minInflationPoolBalance = 100;
 
   //Randomness
-  uint32 private constant _randomSeedUpdateSeconds = 3600;
+  uint32 private constant _randomSeedUpdateSeconds = 86400;
   bytes32 private s_keyHash;
   uint256 private s_fee;
   uint256 private _randomSeed = 1111111; //Will be updated periodically with truly random data
 
   //How often will the upkeep function run
-  uint32 private constant _upkeepSeconds = 200;
+  uint32 private constant _upkeepSeconds = 3600;
 
   //Don't let the bitcoin price be updated more than every few seconds
   uint32 private constant _bitcoinPriceUpdateRateLimitSeconds = 60;
